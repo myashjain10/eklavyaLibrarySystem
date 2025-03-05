@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DEV_DATABASE_URL")
+}
+
+model Member{
+  id            String @id @default(uuid())
+  name          String
+  phone_number  String @db.VarChar(10)
+  email         String?
+  status        Status @default(previous)
+  last_allot_id String?
+  created_on    DateTime @default(now())
+
+  //relation
+  allotment Allotment[]
+
+  @@map("member")
+}
+
+enum Status {
+  current
+  previous
+}
+
+model Seat {
+  seat_num     Int @id
+  fh_allotted  Boolean @default(false)
+  sh_allotted  Boolean @default(false)
+  fh_allotment String?
+  sh_allotment String?
+  
+  allotment Allotment[]
+  @@map("seat")
+}
+
+model Allotment{
+  id          String @id @default(uuid())
+  member_id   String
+  seat_num    Int
+  start_date  DateTime
+  end_date    DateTime
+  full_day    Boolean @default(true)
+  first_half  Boolean @default(false)
+  second_half Boolean @default(false)
+
+  member    Member @relation(fields: [member_id], references: [id])
+  seat      Seat @relation(fields: [seat_num], references: [seat_num])
+
+  @@map("allotment")
+}
+
