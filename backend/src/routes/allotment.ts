@@ -15,7 +15,7 @@ allotRouter.post("/", async (c)=>{
   //   first_half,
   //   second_half
   // }
-// check whether startDate < EndDate and startTime < endTime
+  // check whether startDate < EndDate and startTime < endTime
 
   const prisma = c.get("prisma");
   const body = await c.req.json();

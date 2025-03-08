@@ -4,6 +4,7 @@ import { sendWelcome } from "../utils/sendSMS";
 
 export const memberRouter = new Hono();
 
+//CREATE MEMBER
 memberRouter.post("/add", async (c)=>{
   //request
   // {
@@ -40,6 +41,7 @@ memberRouter.post("/add", async (c)=>{
   }
 })
 
+//UPDATE MEMBER
 memberRouter.put("/update",async (c)=>{
   //request body { id: member_id }
 
@@ -99,6 +101,7 @@ memberRouter.get("/all", async (c)=>{
   }
 })
 
+//GET ONE MEMBER
 memberRouter.get("/:id", async (c)=>{
   const mid = c.req.param("id");
   console.log(mid)

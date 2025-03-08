@@ -13,6 +13,13 @@ datasource db {
   url      = env("DEV_DATABASE_URL")
 }
 
+model Admin{
+  id         String @id @default(uuid())
+  admin_name String @unique
+  password   String 
+   @@map("admin")
+}
+
 model Member{
   id            String @id @default(uuid())
   name          String
@@ -24,6 +31,7 @@ model Member{
 
   //relation
   allotment Allotment[]
+  sms Sms[]
 
   @@map("member")
 }
@@ -60,3 +68,15 @@ model Allotment{
   @@map("allotment")
 }
 
+model Sms {
+  id String @id @default(uuid())
+  member_id String
+  sms_body String?
+  sent Boolean @default(false)
+  all_members Boolean @default(false)
+  created_on DateTime @default(now())
+
+  member    Member @relation(fields: [member_id], references: [id])
+
+  @@map("sms")
+}
