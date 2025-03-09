@@ -12,7 +12,7 @@ export const authMiddleware = (): MiddlewareHandler =>{
       await next()
     } else {
       c.status(403);
-      return c.json({ error: "unauthorised"});
+      return c.json({ message: "unauthorised"});
     }
   }catch(e){
     c.status(403);
