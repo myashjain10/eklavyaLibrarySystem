@@ -27,7 +27,7 @@ const MemberDetailsPage = () => {
   };
   
   const handleAllotmentButton = () =>{
-    nav(`/member/allotment`);
+    nav(`/member/allotment?id=${member?.id}`);
   }
 
   if(loading || !member){

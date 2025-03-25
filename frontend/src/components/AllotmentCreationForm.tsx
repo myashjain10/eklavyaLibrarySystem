@@ -6,8 +6,7 @@ import { Allotment } from '../types';
 //this component will just take user input, do validation, and then submit the details.
 interface Prop{
   method: "CREATE" | "UPDATE",
-  allotment: Allotment | null,
-  memberid: string
+  allotment: Allotment | undefined,
 }
 
 // Define types for component state and props
@@ -17,7 +16,7 @@ interface AllotmentType {
   secondHalf: boolean;
 }
 
-const AllotmentCreationForm = ({method, allotment, memberid}:Prop) => {
+const AllotmentCreationForm = ({method, allotment}:Prop) => {
   const nav = useNavigate();
 
   const [startDate, setStartDate] = useState<string>('');
@@ -75,7 +74,7 @@ const AllotmentCreationForm = ({method, allotment, memberid}:Prop) => {
         );
       }
 
-      nav(`/member/${memberid}`);
+      nav(`/member/${allotment?.member_id}`);
     }catch(e){
       console.error(e)
     }

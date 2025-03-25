@@ -85,7 +85,7 @@ allotRouter.post("/", async (c)=>{
       
 
       return c.json({
-        newAllotment: newAllotment,
+        allotment: newAllotment,
         updatedSeat: newSeat || null,
         smsbody: smsbody
       })
