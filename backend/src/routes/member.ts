@@ -1,6 +1,6 @@
-
 import { Hono } from "hono";
 import { sendWelcome } from "../utils/sendSMS";
+import { memberSchema } from "../validation/schemas";
 
 export const memberRouter = new Hono();
 
@@ -16,6 +16,7 @@ memberRouter.post("/add", async (c)=>{
   const body = await c.req.json();
 
   //zod validation
+    
   
   const prisma = c.get("prisma")
   try{
@@ -32,7 +33,7 @@ memberRouter.post("/add", async (c)=>{
 
     c.status(200)
     return c.json({
-      "member": member,
+      "member_id": member.id,
       "smsbody": smsbody
     })
   }catch(e){
@@ -72,24 +73,44 @@ memberRouter.put("/update",async (c)=>{
 })
 
 //for table view, fetch members
-memberRouter.get("/all", async (c)=>{
-  
-  const prisma = c.get("prisma");
+memberRouter.get("/bulk", async (c)=>{
   
   try{
-    const allMembers = await prisma.$queryRaw`
-      SELECT
-        member.id, name, phone_number, email, status, created_on, last_allot_id, seat_num, start_date, end_date
-      FROM 
-        member
-      LEFT JOIN
-        allotment
-      ON 
-        member.last_allot_id = allotment.id
-    `;
+
+    //filter params
+    const nameQuery = c.req.query("name")
+    const statusQuery = c.req.query("status")
+
+    // pagination params
+    const page = parseInt(c.req.query("page") || "1");
+    const limit = parseInt(c.req.query("limit") || "20");
+
+    const offset = (page - 1) * limit;
+
+    const prisma = c.get("prisma");
+
+    const whereClause:{name?:object, status?:string} = {}
+
+    if(nameQuery){
+      whereClause.name = {
+        contains: nameQuery, // Case-insensitive search for name containing the query
+        mode: "insensitive", // Make the search case-insensitive
+      }
+    }
+    if(statusQuery){
+      whereClause.status = statusQuery
+    }
+    const filteredMembers = await prisma.member.findMany({
+      where: whereClause,
+      include: {
+        lastAllotment: true, // Include last allotment details
+      },
+      skip: offset, // Pagination: skip certain rows
+      take: limit, // Pagination: limit the number of rows
+    });
   
   return c.json({
-    members: allMembers
+    members: filteredMembers
   })
 
   }catch(e){
@@ -102,42 +123,23 @@ memberRouter.get("/all", async (c)=>{
 })
 
 //GET ONE MEMBER
-memberRouter.get("/:id", async (c)=>{
-  const mid = c.req.param("id");
-  console.log(mid)
+memberRouter.get("/single/:id", async (c)=>{
+  const member_id = c.req.param("id");
+
   const prisma = c.get("prisma");
 
   try{
     const member = await prisma.member.findFirst({
-      where:{
-        id: mid
+      where: {
+        id: member_id
       },
-      select:{
-        id: true,
-        name: true,
-        phone_number: true,
-        email: true,
-        status: true,
-        last_allot_id: true,
-        created_on: true
-        }
-      });
-    
-    let lastAllotment = null;
-    if(member.last_allot_id){
-       lastAllotment = await prisma.allotment.findFirst({
-        where:{
-          AND:[
-            {id: member.last_allot_id},
-            {member_id: member.id}
-          ]
-        }
-      })
-    }
+      include: {
+        lastAllotment: true, // Include last allotment details
+      },
+});
     
     return c.json({
-      "member":member,
-      "lastAllotment":lastAllotment
+      member: member
     })
   }catch(e){
     console.log(e);

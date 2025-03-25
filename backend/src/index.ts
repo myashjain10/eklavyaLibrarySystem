@@ -117,8 +117,9 @@ export default {
           console.log('Updated SMS:', messages);
           
         }
-
       }
+
+
       //sms webhook test
       const url = "https://trigger.macrodroid.com/67cad7d4-8247-4008-a010-40d3eb08bd80/sms?phNumber=0";
       const response = await fetch(url, {

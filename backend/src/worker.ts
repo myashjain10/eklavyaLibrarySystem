@@ -4,6 +4,9 @@ import { allotRouter } from './routes/allotment'
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { authMiddleware } from './middlewares/authmiddleware'
+import adminRouter from './routes/admin'
+import { jwt } from 'hono/jwt'
+import { cors } from 'hono/cors'
 
 
 interface Env {
@@ -13,22 +16,23 @@ interface Env {
   
   PROD_DATABASE_URL: string,
   PROD_JWT_SECRET: string
-
 }
 
 const app = new Hono<{
   Bindings:Env,
   Variables:{
-    SMS_WEBHOOK_URL: string
+    SMS_WEBHOOK_URL: string,
+    JWT_SECRET: string,
   }
 }>()
 
+app.use(cors())
 
 app.get('/', (c) => {
-  return c.text('Eklavya Landing Page. Your DEV DB string is ' + c.env.DEV_DATABASE_URL)
+  return c.text('welcome to Eklavya Library');
 })
 
-//apply prisma middleware
+//prisma middleware, not using from prismaMiddleware.ts
 app.use("/api/v1/*", async (c,next)=>{
   const prisma = new PrismaClient({
     datasourceUrl: c.env.PROD_DATABASE_URL,
@@ -42,7 +46,16 @@ app.use("/api/v1/*", async (c,next)=>{
   await next();
 })
 
-app.use("api/v1/*", authMiddleware())
+//admin routes
+app.use("/api/v1/admin/*", async (c, next)=>{
+  c.set("JWT_SECRET", c.env.PROD_JWT_SECRET);
+  await next();
+})
+app.route("/api/v1/admin", adminRouter)
+
+
+//auth middleware for other routes
+// app.use("api/v1/*",authMiddleware())
 
 app.route("/api/v1/member", memberRouter)
 app.route("/api/v1/allotment", allotRouter)

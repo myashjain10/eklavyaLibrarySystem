@@ -26,11 +26,12 @@ model Member{
   phone_number  String @db.VarChar(10)
   email         String?
   status        Status @default(previous)
-  last_allot_id String?
+  last_allot_id String? @unique
   created_on    DateTime @default(now())
 
-  //relation
-  allotment Allotment[]
+  //relations
+  lastAllotment Allotment? @relation("LasAllotmentRelation",fields: [last_allot_id], references: [id])
+  allotment Allotment[] @relation("AllotmentRelation")
   sms Sms[]
 
   @@map("member")
@@ -62,9 +63,9 @@ model Allotment{
   first_half  Boolean @default(false)
   second_half Boolean @default(false)
 
-  member    Member @relation(fields: [member_id], references: [id])
+  member    Member @relation("AllotmentRelation",fields: [member_id], references: [id])
   seat      Seat @relation(fields: [seat_num], references: [seat_num])
-
+  referencedBy Member? @relation("LasAllotmentRelation")
   @@map("allotment")
 }
 

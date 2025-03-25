@@ -31,11 +31,10 @@ export const sendWelcome = async (member:Member, SMS_WEBHOOK_URL:string) => {
         },
         body: smsbody,
       });
-      
-      console.log('Success:', response);
+
       return smsbody;
   } catch (error) {
-      console.error('Error:', error);
+      console.log('Error:', error);
       return "Could not send SMS";
   }
 }
@@ -62,10 +61,9 @@ export const sendAllotmentNotification = async (member:Member, allotment:Allotme
         body: smsbody,
       });
       
-      console.log('Success:', response);
       return smsbody;
   } catch (error) {
-      console.error('Error:', error);
+      console.log('Error:', error);
       return "Could not send SMS";
   }
 }

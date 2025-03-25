@@ -15,7 +15,7 @@ allotRouter.post("/", async (c)=>{
   //   first_half,
   //   second_half
   // }
-  // check whether startDate < EndDate and startTime < endTime
+  // check whether startDate < EndDate
 
   const prisma = c.get("prisma");
   const body = await c.req.json();
@@ -312,7 +312,7 @@ allotRouter.get("/",async(c)=>{
   })
 })
 
-allotRouter.get("/:id",async (c)=>{
+allotRouter.get("/single/:id",async (c)=>{
   //SEAT GRID DETAIL FETCHING
   const id = c.req.param("id")
   const prisma = c.get("prisma")

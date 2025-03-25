@@ -8,7 +8,8 @@ import { withAccelerate } from '@prisma/extension-accelerate';
 declare module 'hono' {
   interface ContextVariableMap {
     prisma: any, // there is a better way for this
-    SMS_WEBHOOK_URL: string
+    SMS_WEBHOOK_URL: string,
+    JWT_SECRET: string
   }
   
   // Extend env bindings if needed
