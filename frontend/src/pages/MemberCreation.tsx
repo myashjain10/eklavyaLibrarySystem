@@ -11,7 +11,7 @@ const MemberCreationPage = () => {
       <TopBar />
       
       <div className="flex-grow container mx-auto py-8 px-4">
-        <MemberCreationForm />
+        <MemberCreationForm member={undefined} />
       </div>
       
       <Footer />

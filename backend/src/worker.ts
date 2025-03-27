@@ -7,6 +7,7 @@ import { authMiddleware } from './middlewares/authmiddleware'
 import adminRouter from './routes/admin'
 import { jwt } from 'hono/jwt'
 import { cors } from 'hono/cors'
+import seatRouter from './routes/seat'
 
 
 interface Env {
@@ -59,6 +60,7 @@ app.route("/api/v1/admin", adminRouter)
 
 app.route("/api/v1/member", memberRouter)
 app.route("/api/v1/allotment", allotRouter)
+app.route("/api/v1/seat", seatRouter)
 
 
 export default app

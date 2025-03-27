@@ -44,7 +44,13 @@ memberRouter.post("/add", async (c)=>{
 
 //UPDATE MEMBER
 memberRouter.put("/update",async (c)=>{
-  //request body { id: member_id }
+  //request body 
+  // {
+  //   "id": "123asdfas12312"
+  //   "name": "Yash Jain",
+  //   "phone_number": 9826836812,
+  //   "email": "yash@gmail.com"
+  // }
 
   const body = await c.req.json();
 
@@ -64,7 +70,7 @@ memberRouter.put("/update",async (c)=>{
       }
     })
     return c.json({
-      "member":member
+      "member_id":member.id
     })
   }catch(e){
     c.status(403);

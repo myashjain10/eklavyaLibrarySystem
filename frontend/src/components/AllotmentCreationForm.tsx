@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Allotment } from '../types';
 
@@ -7,6 +7,7 @@ import { Allotment } from '../types';
 interface Prop{
   method: "CREATE" | "UPDATE",
   allotment: Allotment | undefined,
+  memberid: string
 }
 
 // Define types for component state and props
@@ -16,21 +17,45 @@ interface AllotmentType {
   secondHalf: boolean;
 }
 
-const AllotmentCreationForm = ({method, allotment}:Prop) => {
+const AllotmentCreationForm = ({method, allotment, memberid}:Prop) => {
   const nav = useNavigate();
-
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [seatNumber, setSeatNumber] = useState<string>('');
+  
+  const [seat, setSeat] = useState({
+    seat_num:0,
+    fh_allotted: false,
+    sh_allotted: false,
+  });
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [seatNumber, setSeatNumber] = useState('');
   const [allotmentType, setAllotmentType] = useState<AllotmentType>({
     fullDay: false,
     firstHalf: false,
     secondHalf: false
   });
 
-  const handleCheckAvailability = (): void => {
-    // Implement availability checking logic here
-    alert(`Checking availability for Seat ${seatNumber}`);
+  useEffect(()=>{
+    if(allotment){
+      setStartDate(allotment.start_date.slice(0,10));
+      setEndDate(allotment.end_date.slice(0,10));
+      setSeatNumber(allotment.seat_num.toString());
+      setAllotmentType({
+        fullDay: allotment.full_day,
+        firstHalf: (allotment.full_day)? false : allotment.first_half,
+        secondHalf: (allotment.full_day)? false : allotment.second_half
+      })
+    }
+  },[allotment])
+
+  const handleCheckAvailability = async () => {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/seat/check/${seatNumber}`,
+      {
+        headers:{
+          Authorization: localStorage.getItem("token") || ""
+        }
+      }
+    )
+    setSeat(response.data?.seat);
   };
 
   const handleCheckboxChange = (type: keyof AllotmentType): void => {
@@ -46,13 +71,14 @@ const AllotmentCreationForm = ({method, allotment}:Prop) => {
     // Implement submission logic here
     const formData = {
       member_id: memberid,
-      start_date: startDate,
-      end_date: endDate,
-      seat_num: seatNumber,
+      start_date: `${startDate}T00:00:00Z`,
+      end_date: `${endDate}T00:00:00Z`,
+      seat_num: parseInt(seatNumber),
       full_day: allotmentType.fullDay,
-      first_half: allotmentType.firstHalf,
-      second_half: allotmentType.secondHalf
+      first_half: (allotmentType.fullDay) ? true : allotmentType.firstHalf,
+      second_half: (allotmentType.fullDay) ? true : allotmentType.secondHalf
     }
+    console.log(formData);
     try{
       if(method == "CREATE"){
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/allotment`,
@@ -63,6 +89,7 @@ const AllotmentCreationForm = ({method, allotment}:Prop) => {
             }
           }
         );
+        console.log(response);
       } else if(method == "UPDATE"){
         const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/v1/allotment/${allotment?.id}`,
           formData,
@@ -72,26 +99,20 @@ const AllotmentCreationForm = ({method, allotment}:Prop) => {
             }
           }
         );
+        console.log(response);
       }
 
-      nav(`/member/${allotment?.member_id}`);
+      nav(`/member/${memberid}`);
     }catch(e){
       console.error(e)
     }
-
-    console.log({
-      startDate,
-      endDate,
-      seatNumber,
-      allotmentType
-    });
   };
 
   return (
     <div className="m-auto flex items-center justify-center w-screen ">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Create Allotment
+          {(allotment)?"Update": "Create"} Allotment
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -131,7 +152,9 @@ const AllotmentCreationForm = ({method, allotment}:Prop) => {
                 type="text"
                 id="seatNumber"
                 value={seatNumber}
-                onChange={(e) => setSeatNumber(e.target.value)}
+                onChange={(e) => {
+                  setSeatNumber(e.target.value)
+                }}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 required
               />
@@ -144,6 +167,22 @@ const AllotmentCreationForm = ({method, allotment}:Prop) => {
               Check
             </button>
           </div>
+
+          {(seat.seat_num != 0)? 
+            <div className='flex justify-around bg-slate-200 py-2 px-3 rounded-sm'>
+              Seat Status : 
+              <div className='flex items-center'>
+                <div className={`${seat.fh_allotted ?"bg-amber-300" :""} w-4 h-4 border-2 border-black mr-1 rounded-xs`}></div>
+                <p>First Half</p>
+              </div>
+              <div className='flex items-center'>
+                <div className={`${seat.sh_allotted ?"bg-amber-300" :""} w-4 h-4 border-2 border-black mr-1 rounded-xs`}></div>
+                <p>Second Half</p>
+              </div>
+              
+            </div>
+          : ""}
+          
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">

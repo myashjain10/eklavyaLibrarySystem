@@ -26,8 +26,13 @@ const MemberDetailsPage = () => {
     return status === 'current' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200';
   };
   
+  const handleEditButton = () => {
+    nav(`/member/update/${member?.id}`);
+  }
+
+
   const handleAllotmentButton = () =>{
-    nav(`/member/allotment?id=${member?.id}`);
+    nav(`/member/allotment?name=${ encodeURIComponent(member?.name || "") }&memberid=${ member?.id }&id=${ (member?.status== "previous") ? "null" :member?.lastAllotment.id }`);
   }
 
   if(loading || !member){
@@ -124,8 +129,8 @@ const MemberDetailsPage = () => {
                           <p className="text-sm text-gray-500">Timings</p>
                           <p className="text-base">{
                               member.lastAllotment.full_day ? "Full Day (8 am - 10 pm)"
-                              : (member.lastAllotment.first_half ? "First Half (8 am - 3 pm"
-                                :( member.lastAllotment.second_half ? "Second Half (3 pm - 10 pm" : "-")
+                              : (member.lastAllotment.first_half ? "First Half (8 am - 3 pm)"
+                                :( member.lastAllotment.second_half ? "Second Half (3 pm - 10 pm)" : "-")
                                 )
                             }</p>
                         </div>
@@ -139,6 +144,7 @@ const MemberDetailsPage = () => {
               <div className="mt-8 flex justify-end space-x-4">
                 <button 
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-150"
+                  onClick={handleEditButton}
                 >
                   Edit Member
                 </button>
@@ -146,7 +152,7 @@ const MemberDetailsPage = () => {
                   className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150"
                   onClick={handleAllotmentButton}
                 >
-                  Create New Allotment
+                  {(member.status == "previous")? "Create New ": "Update "} Allotment
                 </button>
               </div>
             </div>

@@ -31,8 +31,6 @@ const AllMembersPage = () => {
   // Navigate to member details page
   const handleViewDetails = (memberId: string) => {
     nav(`/member/${memberId}`)
-    // In a real app, you would use router navigation
-    // e.g., router.push(`/members/${memberId}`);
   };
 
   if(loading){
@@ -122,8 +120,8 @@ const AllMembersPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{
                           member.lastAllotment?.full_day ? "Full Day (8 am - 10 pm)"
-                          : (member.lastAllotment?.first_half ? "First Half (8 am - 3 pm"
-                            :( member.lastAllotment?.second_half ? "Second Half (3 pm - 10 pm" : "-")
+                          : (member.lastAllotment?.first_half ? "First Half (8 am - 3 pm)"
+                            :( member.lastAllotment?.second_half ? "Second Half (3 pm - 10 pm)" : "-")
                             )
 
                         }</div>

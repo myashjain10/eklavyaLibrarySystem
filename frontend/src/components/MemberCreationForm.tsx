@@ -1,8 +1,9 @@
 import axios from 'axios';
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Member } from '../types';
 
-const MemberCreationForm = () => {
+const MemberCreationForm = ({member}:{member: Member | undefined}) => {
   const nav = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -19,6 +20,17 @@ const MemberCreationForm = () => {
   
   const [successMessage, setSuccessMessage] = useState('');
   
+  
+  useEffect(()=>{
+    if(member){
+      setFormData({
+        name: member.name,
+        phone_number: member.phone_number,
+        email: member.email
+      })
+    }
+  },[member])
+
   const validateForm = () => {
     let valid = true;
     const newErrors = {
@@ -77,16 +89,31 @@ const MemberCreationForm = () => {
       console.log('Form submitted:', formData);
 
       try{
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/member/add`,
-          formData,
-          {
-            headers:{
-              Authorization: localStorage.getItem("token") || ""
+        //update member
+        if(member){
+          const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/v1/member/update`,
+            {...formData,
+              id: member.id
+            },
+            {
+              headers:{
+                Authorization: localStorage.getItem("token") || ""
+              }
             }
-          }
-        );
-
-        nav(`/member/${response.data.member_id}`)
+          );
+          nav(`/member/${response.data.member_id}`)
+          
+        } else {
+          const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/member/add`,
+            formData,
+            {
+              headers:{
+                Authorization: localStorage.getItem("token") || ""
+              }
+            }
+          );
+          nav(`/member/${response.data.member_id}`)
+        }
       }catch(e){
         console.log(e);
         alert("Couldn't Publish Blog. Try Again")
@@ -105,7 +132,7 @@ const MemberCreationForm = () => {
   
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Member</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">{(member)? "Update " : "Create New "}Member</h2>
       
       {successMessage && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
@@ -178,7 +205,7 @@ const MemberCreationForm = () => {
           type="submit"
           className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
         >
-          Create Member
+          {(member)? "Update " : "Create "} Member
         </button>
       </form>
     </div>
